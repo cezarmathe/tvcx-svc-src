@@ -20,7 +20,13 @@ job "minecraft" {
       port "tcp" {
         static       = 25565
         to           = 25565
-        host_network = "tvcxdorm"
+        host_network = "dorm"
+      }
+
+      port "rcon" {
+        static       = 25575
+        to           = 25575
+        host_network = "dorm"
       }
     }
 
@@ -37,27 +43,39 @@ job "minecraft" {
       }
     }
 
+    service {
+      name = "minecraft-rcon"
+      port = "rcon"
+
+      check {
+        name         = "Check TCP socket port."
+        port         = "tcp"
+        type         = "tcp"
+        interval     = "60s"
+        timeout      = "10s"
+      }
+    }
+
     task "minecraft" {
       driver = "docker"
 
       config {
-        image = "phyremaster/papermc"
-        ports = ["tcp"]
+        image = "itzg/minecraft-server"
+        # ports = ["tcp", "rcon"]
 
         mounts = [
           {
             type = "bind"
-            source = "/srv/file/storage/minecraft"
-            target = "/papermc"
+            source = "/srv/file/ssd0/storage/minecraft"
+            target = "/data"
             readonly = false
           },
         ]
       }
 
       env {
-        MC_RAM      = "4G"
-        MC_VERSION  = "1.16.3"
-        PAPER_BUILD = "240"
+        MEMORY = "3G"
+        EULA   = "TRUE"
       }
 
       resources {
